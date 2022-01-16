@@ -1,4 +1,5 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet}
+  from "react-native";
 
 export default function App() {
   return (
@@ -10,6 +11,42 @@ export default function App() {
       }}
     >
       <Text>Universal React with Expo</Text>
+      <WeatherView/>
     </View>
   );
 }
+
+const WeatherView = () => {
+  return (
+    <View>
+      <Text> Text at the top of a WeatherView component</Text>
+      <View style={styles.container}>
+        <View style={styles.row}>
+        <View
+          style={[styles.box, {backgroundColor: "orange"}]}/>
+        <View
+          style={[styles.box, {backgroundColor: "blue"}]}/>
+        <View
+          style={[styles.box, {backgroundColor: "blue"}]}/>
+        <View
+          style={[styles.box, {backgroundColor: "blue"}]}/>
+  </View>
+    </View></View>
+  );
+}
+
+styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "aliceblue",
+    maxHeight: 200,
+  },
+  box: {
+    width: 50,
+    height: 80,
+  },
+  row: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+});
