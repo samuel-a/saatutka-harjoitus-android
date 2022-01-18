@@ -1,0 +1,6 @@
+
+function fetchCityData(ids) {
+
+}
+
+idMap = {}
