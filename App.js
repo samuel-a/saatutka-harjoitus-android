@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet }
+import { View, Text, StyleSheet, Image }
   from "react-native";
 import React, { useState, useContext } from "react";
 import SelectDropdown from "react-native-select-dropdown"
-import {fetchCityData, idMap} from "./request.js";
+import {fetchCityData, idLookup} from "./request.js";
 
 // Context used solely for transferring knowledge of which cities are selected
 // from dropdown to WeatherList
@@ -20,6 +20,7 @@ const cities = [
   "Tampere"
 ]
 
+fetchCityData("Helsinki")
 export default function App() {
   const [selection, setSelection] = useState(cities[0])
   const value = { selection, setSelection };
@@ -43,6 +44,9 @@ export default function App() {
       </selectionContext.Provider>
       <Text>Text between dropdown and WeatherView list</Text>
       <WeatherView />
+      <Image source={{
+        uri: "http://openweathermap.org/img/wn/10d@2x.png"
+      }} style={{width:100, height:100}}/>
     </View>
   );
 }
