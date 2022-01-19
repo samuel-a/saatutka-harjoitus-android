@@ -70,92 +70,127 @@ class forecastData {
     }
 }
 
-function fetchCurrentWeather(city) {
+async function fetchCurrentWeather(city) {
     const id = idLookup[city];
     console.log(`API_KEY: ${API_KEY}`);
 
-    //const requestString =
-    //    `http://api.openweathermap.org/data/2.5/weather?id=${id}&lang=fi&appid=${API_KEY}`;
-    //console.log(requestString)
-    //const request = new Request(requestString);
-    //const response = fetch(request)
-    //    .then((response) => {
-    //        console.log(response)
-    //        got = response.json();
-    //    })
-    //    .then((json) => {
-    //        console.log(json);
-    //    }).catch((error) => {
-    //        console.error(error);
-    //    })reac;
-    const response = {
-        "base": "stations",
-        "clouds": {
-            "all": 75,
-        },
-        "cod": 200,
-        "coord": {
-            "lat": 60.1695,
-            "lon": 24.9355,
-        },
-        "dt": 1642527035,
-        "id": 658225,
-        "main": {
-            "feels_like": 272.73,
-            "humidity": 84,
-            "pressure": 1014,
-            "temp": 272.73,
-            "temp_max": 273.8,
-            "temp_min": 271.47,
-        },
-        "name": "Helsinki",
-        "sys": {
-            "country": "FI",
-            "id": 2028456,
-            "sunrise": 1642489475,
-            "sunset": 1642514172,
-            "type": 2,
-        },
-        "timezone": 7200,
-        "visibility": 10000,
-        "weather": [
-            {
-                "description": "broken clouds",
-                "icon": "04n",
-                "id": 803,
-                "main": "Clouds",
-            },
-        ],
-        "wind": {
-            "deg": 259,
-            "gust": 4.47,
-            "speed": 0.89,
-        },
+    const requestString =
+        `http://api.openweathermap.org/data/2.5/weather?id=${id}&lang=fi&appid=${API_KEY}`;
+    console.log(requestString)
+    const request = new Request(requestString);
+
+    // async function fetchData() {
+    //     const res = await fetch(request);
+    //     //    .then( res => res.json())dddd
+    //     //if(!response.ok) {
+    //     //    console.error(response.status)
+    //     //}
+    //     //.then(res => await res.json())
+    //     //})
+    //     //.then((json) => {
+    //     //    console.log(json);
+    //     //.catch(error => console.error(error));
+    //     console.log(res.json())
+    //     return(res.json());
+    // }
+    try {
+        const _response = await fetch(request);
+        const response = await _response.json();
+        const dt = new Date(response.dt * 1000);
+        console.log("Dt: " + dt)
+        const _time = `${dt.getHours()}:${dt.getMinutes()}`;
+        // Change unix date to XX. Month -string form (in Finnish)
+        //const _date = dt.toLocaleDateString("fi-FI",
+        //                                    options={day: "numeric", month: "long"});
+
+        const _date = format(dt, "do MMMM", { locale: fi });
+        return new currentData(
+            city = city,
+            icon = response.weather[0].icon,
+            temperature = response.main.temp - 273.15, // transform to celsius
+            description = response.weather[0].description,
+            wind_speed = response.wind.speed,
+            date = _date,
+            humidity = response.main.humidity,
+            time = _time,
+            precipitation =
+            typeof (response.precipitation) === "undefined" ? "--" : response.precipitation //empty if info not available
+        )
+    } catch (error) {
+        console.error(error);
     }
+    //    .then( res => res.json());
+    //const await
+    //const response = await fetchData();
+    // const response = {
+    //     "base": "stations",
+    //     "clouds": {
+    //         "all": 75,
+    //     },
+    //     "cod": 200,
+    //     "coord": {
+    //         "lat": 60.1695,
+    //         "lon": 24.9355,
+    //     },
+    //     "dt": 1642527035,
+    //     "id": 658225,
+    //     "main": {
+    //         "feels_like": 272.73,
+    //         "humidity": 84,
+    //         "pressure": 1014,
+    //         "temp": 272.73,
+    //         "temp_max": 273.8,
+    //         "temp_min": 271.47,
+    //     },
+    //     "name": "Helsinki",
+    //     "sys": {
+    //         "country": "FI",
+    //         "id": 2028456,
+    //         "sunrise": 1642489475,
+    //         "sunset": 1642514172,
+    //         "type": 2,
+    //     },
+    //     "timezone": 7200,
+    //     "visibility": 10000,
+    //     "weather": [
+    //         {
+    //             "description": "broken clouds",
+    //             "icon": "04n",
+    //             "id": 803,
+    //             "main": "Clouds",
+    //         },
+    //     ],
+    //     "wind": {
+    //         "deg": 259,
+    //         "gust": 4.47,
+    //         "speed": 0.89,
+    //     },
+    // }
 
     // Change Unix time to default HH:MM string.
-    const dt = new Date(response.dt * 1000);
-    const _time = `${dt.getHours()}:${dt.getMinutes()}`;
-    // Change unix date to XX. Month -string form (in Finnish)
-    //const _date = dt.toLocaleDateString("fi-FI",
-    //                                    options={day: "numeric", month: "long"});
+    // const dt = new Date(response.dt * 1000);
+    // console.log("Dt: " + dt)
+    // const _time = `${dt.getHours()}:${dt.getMinutes()}`;
+    // // Change unix date to XX. Month -string form (in Finnish)
+    // //const _date = dt.toLocaleDateString("fi-FI",
+    // //                                    options={day: "numeric", month: "long"});
 
-    const _date = format(dt, "do MMMM", { locale: fi });
-    return new currentData(
-        city = city,
-        icon = response.weather[0].icon,
-        temperature = response.main.temp - 273.15, // transform to celsius
-        description = response.weather[0].description,
-        wind_speed = response.wind.speed,
-        date = _date,
-        humidity = response.main.humidity,
-        time = _time,
-        precipitation =
-        typeof (response.precipitation) === "undefined" ? "--" : response.precipitation //empty if info not available
-    )
+    // const _date = format(dt, "do MMMM", { locale: fi });
+    // return new currentData(
+    //     city = city,
+    //     icon = response.weather[0].icon,
+    //     temperature = response.main.temp - 273.15, // transform to celsius
+    //     description = response.weather[0].description,
+    //     wind_speed = response.wind.speed,
+    //     date = _date,
+    //     humidity = response.main.humidity,
+    //     time = _time,
+    //     precipitation =
+    //     typeof (response.precipitation) === "undefined" ? "--" : response.precipitation //empty if info not available
+    // )
 }
 
-function fetchForecast(city) {
+async function fetchForecast(city) {
     const id = idLookup[city];
     const requestString =
         `api.openweathermap.org/data/2.5/forecast?id=${id}&cnt=6&lang=fi&appid=${API_KEY}`;
@@ -169,7 +204,7 @@ function fetchForecast(city) {
         tail(response.list).map((data) => {
             let dt = new Date(data.dt * 1000);
             let _time = `${dt.getHours()}:${dt.getMinutes()}`;
-            return(new forecastData(
+            return (new forecastData(
                 icon = data.weather[0].icon,
                 temperature = data.main.temp - 273.15, // transform to celsius
                 wind_speed = data.wind.speed,

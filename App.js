@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, Image, ImageEditor }
+import { View, Text, StyleSheet, Image, ScrollView, SafeAreaView }
   from "react-native";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import SelectDropdown from "react-native-select-dropdown"
 import { fetchCurrentWeather, fetchForecast } from "./request.js";
 import { useFonts } from 'expo-font'; // Required for Arial
@@ -26,22 +26,107 @@ export default function App() {
   const [selection, setSelection] = useState(cities[0])
   const value = { selection, setSelection };
   return (
-    <selectionContext.Provider value={value}>
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "flex-start",
-          alignItems: "center",
-          backgroundColor: "#F8F9FA"
-        }}
-      >
-        <TopBar />
-        <DropDown />
-        <CurrentWeatherView/>
-        <ForecastWeatherViewContainer/>
-      </View >
-    </selectionContext.Provider>
+    <SafeAreaView
+      style={{ backgroundColor: "#F8F9FA", flex: 1 }}
+    >
+      <ScrollView>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "flex-start",
+            alignItems: "center",
+            marginBottom: 15
+          }}>
+          <TopBar />
+          <selectionContext.Provider value={value}>
+            <DropDown />
+            <ViewPicker style={{ minWidth: "85%", maxWidth: 400 }} />
+            {/*<CurrentWeatherView />
+          <ForecastWeatherViewContainer />*/}
+          </selectionContext.Provider>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
+}
+
+function ViewPicker() {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([])
+  const [singleData, setSingleData] = useState([])
+  const { selection, setSelection } = useContext(selectionContext);
+  console.log("selection at ViewPicker(): " + selection)
+
+  const getData = async () => {
+    if (selection === "Kaikki kaupungit") {
+      // const hel = await fetchCurrentWeather("Helsinki");
+      // const helForecast = await fetchForecast("Helsinki");
+      // const kuo = await fetchCurrentWeather("Kuopio");
+      // const kuoForecast = await fetchForecast("Kuopio");
+      // const jyv = fetchCurrentWeather("Jyväskylä");
+      // const jyvForecast = await fetchForecast("Jyväskylä");
+      // const tam = fetchCurrentWeather("Tampere");
+      // const tamForecast = await fetchForecast("Tampere");
+
+      const [
+        hel, helForecast,
+        kuo, kuoForecast,
+        jyv, jyvForecast,
+        tam, tamForecast] = await Promise.all([
+          fetchCurrentWeather("Helsinki"),
+          fetchForecast("Helsinki"),
+          fetchCurrentWeather("Kuopio"),
+          fetchForecast("Kuopio"),
+          fetchCurrentWeather("Jyväskylä"),
+          fetchForecast("Jyväskylä"),
+          fetchCurrentWeather("Tampere"),
+          fetchForecast("Tampere")]
+          );
+
+      setData([
+        hel, helForecast,
+        kuo, kuoForecast,
+        jyv, jyvForecast,
+      tam, tamForecast]);
+      setLoading(false);
+    } else {
+      console.log("we hit else clause")
+      const single_data = await Promise.all([
+        fetchCurrentWeather(selection),
+        fetchForecast(selection)]);
+        ///[selectionData, selectionForecastData]
+      setSingleData(single_data);
+      setLoading(false);
+    }
+  }
+  
+  useEffect(() => {
+    getData();
+  }, [])
+
+  if (selection === "Kaikki kaupungit") {
+    return (
+        loading ? <Text>Loading...</Text> : (
+        <View>
+        <CurrentWeatherView data={data[0]} />
+        <ForecastWeatherViewContainer data={data[1]} />
+        <CurrentWeatherView data={data[2]} />
+        <ForecastWeatherViewContainer data={data[3]} />
+        <CurrentWeatherView data={data[4]} />
+        <ForecastWeatherViewContainer data={data[5]} />
+        <CurrentWeatherView data={data[6]} />
+        <ForecastWeatherViewContainer data={data[7]} />
+      </View>)
+    )
+  } else {
+    return (
+      loading ? <Text> Loading... </Text> :
+      <View>
+        <CurrentWeatherView data={singleData[0]} />
+        <ForecastWeatherViewContainer data={singleData[1]} />
+      </View>
+    )
+  }
 }
 
 function TopBar() {
@@ -64,7 +149,7 @@ function DropDown() {
       data={cities}
       onSelect={(selectedItem, index) => {
         setSelection(selectedItem)
-        console.log(selection)
+        console.log("selection at DropDown(): "+ selection)
       }}
       buttonTextAfterSelection={(selectedItem, index) => {
         // text represented after item is selected
@@ -81,80 +166,77 @@ function DropDown() {
 }
 
 function CurrentWeatherView(props) {
-  const { selection, setSelection } = useContext(selectionContext);
-  const data = fetchCurrentWeather("Helsinki")//selection
-  console.log(`https://openweathermap.org/img/wn/${data.icon}@2x.png`);
+  console.log("In CurrentWeatherView, props.data:");
+  console.log(props.data);
   return (
-      <View style={styles.currentWeatherView}>
-        <View style={styles.row}>
-          <View>
-            <CustomText style={styles.cityText}>{data.city}</CustomText>
-            <CustomText style={styles.descriptionText}>{data.description}</CustomText>
-          </View>
-          <View style={styles.row}>
-            <View>
-              <Image source={{ uri: `https://openweathermap.org/img/wn/${data.icon}@2x.png` }}
-                style={{ width: 60, height: 60, marginTop: -12, marginRight: 5 }} />
-            </View>
-            <View>
-              <CustomText style={styles.temperatureText}>
-                {data.temperature.toFixed(1) + "°C"}
-              </CustomText>
-            </View>
-          </View>
+    <View style={styles.currentWeatherView}>
+      <View style={styles.row}>
+        <View>
+          <CustomText style={styles.cityText}>{props.data.city}</CustomText>
+          <CustomText style={styles.descriptionText}>{props.data.description}</CustomText>
         </View>
         <View style={styles.row}>
           <View>
-            <CustomText />
-            <CustomText style={styles.dateText}>{data.date}</CustomText>
-            <CustomText style={styles.timeText}>{data.time}</CustomText>
+            <Image source={{ uri: `https://openweathermap.org/img/wn/${props.data.icon}@2x.png` }}
+              style={{ width: 60, height: 60, marginTop: -12, marginRight: 5 }} />
           </View>
-          <View style={{ alignItems: "flex-end" }}>
-            <CustomText style={styles.specificsText}>
-              {"Tuuli: " + data.wind_speed + " m/s"}
-            </CustomText>
-            <CustomText style={styles.specificsText}>
-              {"Ilmankosteus: " + data.humidity + "%"}
-            </CustomText>
-            <CustomText style={styles.specificsText}>
-              {"Sademäärä (3h): " + data.precipitation + "mm"}
+          <View>
+            <CustomText style={styles.temperatureText}>
+              {props.data.temperature.toFixed(1) + "°C"}
             </CustomText>
           </View>
         </View>
       </View>
+      <View style={styles.row}>
+        <View>
+          <CustomText />
+          <CustomText style={styles.dateText}>{props.data.date}</CustomText>
+          <CustomText style={styles.timeText}>{props.data.time}</CustomText>
+        </View>
+        <View style={{ alignItems: "flex-end" }}>
+          <CustomText style={styles.specificsText}>
+            {"Tuuli: " + props.data.wind_speed + " m/s"}
+          </CustomText>
+          <CustomText style={styles.specificsText}>
+            {"Ilmankosteus: " + props.data.humidity + "%"}
+          </CustomText>
+          <CustomText style={styles.specificsText}>
+            {"Sademäärä (3h): " + props.data.precipitation + "mm"}
+          </CustomText>
+        </View>
+      </View>
+    </View>
   );
 }
 
 function ForecastWeatherViewContainer(props) {
-  const { selection, setSelection } = useContext(selectionContext);
-  const data = fetchForecast("Helsinki")//selection
   return (
-    <View style={styles.row}>
-      <ForecastWeatherView data={data[0]} />
-      <ForecastWeatherView data={data[1]} />
-      <ForecastWeatherView data={data[2]} />
-      <ForecastWeatherView data={data[3]} />
-      <ForecastWeatherView data={data[4]} />
+    <View style={[styles.row, { minWidth: "85%", maxWidth: 400, marginTop: 7, marginBottom: 5 }]}>
+      <ForecastWeatherView data={props.data[0]} />
+      <ForecastWeatherView data={props.data[1]} />
+      <ForecastWeatherView data={props.data[2]} />
+      <ForecastWeatherView data={props.data[3]} />
+      <ForecastWeatherView data={props.data[4]} />
     </View>
   );
 }
 
 function ForecastWeatherView(props) {
   return (
-    <View styles={styles.forecastWeatherViewContainer}>
+    <View style={styles.forecastWeatherViewContainer}>
       <View style={styles.forecastWeatherViewTop}>
         <CustomText style={styles.timeText}>
           {props.data.time}
         </CustomText>
         <Image source={{ uri: `https://openweathermap.org/img/wn/${props.data.icon}@2x.png` }}
-          style={{ width: 40, height: 40}} />
+          style={{ width: 40, height: 40 }} />
         <CustomText style={styles.smallTemperatureText}>
           {props.data.temperature.toFixed(1) + "°C"}
         </CustomText>
       </View>
       <View style={styles.forecastWeatherViewBottom}>
         <CustomText style={styles.smallSpecificsText}>
-          {props.data.wind_speed + "m/s"}
+          {props.data.wind_speed + " m/s"}
         </CustomText>
         <CustomText style={styles.smallSpecificsText}>
           {props.data.humidity + "%"}
@@ -189,7 +271,7 @@ styles = StyleSheet.create({
     height: 90,
     backgroundColor: "#00A5E5",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
 
   topBarText: {
@@ -210,6 +292,7 @@ styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     borderColor: "#E6E6E6",
+    marginTop: 20
   },
 
   currentWeatherView: {
@@ -224,7 +307,7 @@ styles = StyleSheet.create({
     borderColor: "#E6E6E6",
     paddingHorizontal: 15,
     paddingVertical: 12,
-    marginTop: 10,
+    marginTop: 20
   },
 
   forecastWeatherViewTop: {
@@ -239,11 +322,10 @@ styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     borderColor: "#E6E6E6",
-    paddingHorizontal: 7,
+    paddingHorizontal: 5,
     paddingVertical: 5,
-    maxWidth: 60,
-    marginHorizontal: 3,
-    marginTop: 6,
+    maxWidth: "100%",
+    marginHorizontal: 1
   },
 
   forecastWeatherViewBottom: {
@@ -257,17 +339,16 @@ styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     borderColor: "#E6E6E6",
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
     paddingVertical: 5,
     maxWidth: 60,
     minHeight: 50,
-    marginHorizontal: 3,
+    marginHorizontal: 1,
   },
 
   forecastWeatherViewContainer: {
     maxHeight: 170,
-    maxWidth: 400,
-    minWidth: "85%",
+    width: "18%",
   },
 
   box: {
