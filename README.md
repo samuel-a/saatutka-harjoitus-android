@@ -1,6 +1,7 @@
 # Säätutka-harjoitus, android
 
-Part of a recruitment process.
+Part of a recruitment process. A React Native app that uses OpenWeather's
+Weather API to show weather information for select locations in Finland.
 
 ## How to run
 
@@ -13,3 +14,7 @@ placing your OWM api key in `api-config.json`.
 * OWM api will block you for some amount of time if you run too many requests
 too fast so be mindful of this. Requests are only generated when you change your
 selection in the dropdown.
+
+## Screenshots
+![A view showing all cities](./screenshots/AllCities.jpg)
+![A view showing all cities](./screenshots/Tampere.jpg)

@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
   topBarText: {
     fontSize: 18,
     color: "#FFFFFF",
-    marginTop: 32,
+    marginTop: 36,
   },
 
   dropdownText: {
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
   },
 
   dropdownButton: {
-    minWidth: "85%",
+    minWidth: "90%",
     maxWidth: 400,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,

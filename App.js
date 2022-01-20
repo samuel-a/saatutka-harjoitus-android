@@ -40,7 +40,7 @@ export default function App() {
           }}>
           <TopBar />
           <selectionContext.Provider value={value}>
-            <DropDown />
+            <DropDown/>
             <ViewPicker style={{ minWidth: "85%", maxWidth: 400 }} />
           </selectionContext.Provider>
         </View>
