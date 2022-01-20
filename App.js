@@ -1,44 +1,41 @@
-import { View, Text, Image, ScrollView, SafeAreaView }
-  from "react-native";
-import React, { useState, useContext, useEffect} from "react";
-import SelectDropdown from "react-native-select-dropdown"
+import { View, Text, Image, ScrollView, SafeAreaView } from "react-native";
+import React, { useState, useContext, useEffect } from "react";
+import SelectDropdown from "react-native-select-dropdown";
 import { fetchCurrentWeather, fetchForecast } from "./request.js";
 import { styles } from "./styles.js";
-import { useFonts } from 'expo-font'; // Required for Arial
+import { useFonts } from "expo-font"; // Required for Arial
 //import symbolicateStackTrace from "react-native/Libraries/Core/Devtools/symbolicateStackTrace";
 
 // Context used solely for transferring knowledge of which cities are selected
 // from dropdown to WeatherList
-const selectionContext = React.createContext(
-  {
-    selection: "Kaikki kaupungit",
-    setSelection: () => { }
-  });
+const selectionContext = React.createContext({
+  selection: "Kaikki kaupungit",
+  setSelection: () => {},
+});
 
 const cities = [
   "Kaikki kaupungit",
   "Helsinki",
   "Jyväskylä",
   "Kuopio",
-  "Tampere"
-]
+  "Tampere",
+];
 
 export default function App() {
-  const [selection, setSelection] = useState(cities[0])
+  const [selection, setSelection] = useState(cities[0]);
   const value = { selection, setSelection };
 
   return (
-    <SafeAreaView
-      style={{ backgroundColor: "#F8F9FA", flex: 1 }}
-    >
+    <SafeAreaView style={{ backgroundColor: "#F8F9FA", flex: 1 }}>
       <ScrollView>
         <View
           style={{
             flex: 1,
             justifyContent: "flex-start",
             alignItems: "center",
-            marginBottom: 15
-          }}>
+            marginBottom: 15,
+          }}
+        >
           <TopBar />
           <selectionContext.Provider value={value}>
             <DropDown />
@@ -116,13 +113,13 @@ const ViewPicker = () => {
   if (selection === cities[0]) {
     return (
       <View>
-        {cities.slice(1).map(city => {
+        {cities.slice(1).map((city) => {
           return (
             <View key={city}>
               <CurrentWeatherView city={city} />
               <ForecastWeatherViewContainer city={city} />
             </View>
-          )
+          );
         })}
         {/*
         <CurrentWeatherView city={cities[1]} />
@@ -143,33 +140,30 @@ const ViewPicker = () => {
           <CurrentWeatherView data={data[3]} />
           <ForecastWeatherViewContainer data={forecast[3]} />*/}
       </View>
-    )
+    );
   } else {
     return (
       <View>
-        <CurrentWeatherView
-          city={selection} />
-        <ForecastWeatherViewContainer city={selection}/>
+        <CurrentWeatherView city={selection} />
+        <ForecastWeatherViewContainer city={selection} />
         {/*
                 <ForecastWeatherViewContainer city={city}/>
 <ForecastWeatherViewContainer
             data={forecast[cities.indexOf(selection+1)]} />*/}
       </View>
-    )
+    );
   }
-}
+};
 
-function TopBar() {
+const TopBar = () => {
   return (
     <View style={styles.topBar}>
-      <CustomText style={styles.topBarText}>
-        Säätutka
-      </CustomText>
+      <CustomText style={styles.topBarText}>Säätutka</CustomText>
     </View>
   );
 }
 
-function DropDown() {
+const DropDown = () => {
   const { selection, setSelection } = useContext(selectionContext);
   return (
     <SelectDropdown
@@ -178,26 +172,26 @@ function DropDown() {
       buttonTextStyle={styles.dropdownText}
       data={cities}
       onSelect={(selectedItem, index) => {
-        setSelection(selectedItem)
+        setSelection(selectedItem);
         //console.log("selection at DropDown(): " + selectedItem)
       }}
       buttonTextAfterSelection={(selectedItem, index) => {
         // text represented after item is selected
         // if data array is an array of objects then return selectedItem.property to render after item is selected
-        return selectedItem
+        return selectedItem;
       }}
       rowTextForSelection={(item, index) => {
         // text represented for each item in dropdown
         // if data array is an array of objects then return item.property to represent item in dropdown
-        return item
+        return item;
       }}
     />
   );
 }
 
-function CurrentWeatherView(props) {
-  const [loading, setLoading] = useState(true)
-  const [data, setData] = useState()
+const CurrentWeatherView = (props) => {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState();
   const { selection, setSelection } = useContext(selectionContext);
   console.log(`Fetching at CurrentWeatherView with city=${props.city}`);
 
@@ -205,26 +199,34 @@ function CurrentWeatherView(props) {
     //console.log(`Fetching at CurrentWeatherView with city=${props.city}`);
     const _data = await fetchCurrentWeather(props.city);
     setData(_data);
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   useEffect(() => {
     getData();
-  }, [selection])
+  }, [selection]);
 
   console.log("CurrentWeatherView data: ", data);
-  return (loading ? <Text>Loading...</Text> :
+  return loading ? (
+    <Text>Loading...</Text>
+  ) : (
     <View style={styles.currentWeatherView}>
       <View style={styles.row}>
         <View>
           {/*<CustomText>{props.city + data.fact}</CustomText>*/}
           <CustomText style={styles.cityText}>{data.city}</CustomText>
-          <CustomText style={styles.descriptionText}>{data.description}</CustomText>
+          <CustomText style={styles.descriptionText}>
+            {data.description}
+          </CustomText>
         </View>
         <View style={styles.row}>
           <View>
-            <Image source={{ uri: `https://openweathermap.org/img/wn/${data.icon}@2x.png` }}
-              style={{ width: 60, height: 60, marginTop: -12, marginRight: 5 }} />
+            <Image
+              source={{
+                uri: `https://openweathermap.org/img/wn/${data.icon}@2x.png`,
+              }}
+              style={{ width: 60, height: 60, marginTop: -12, marginRight: 5 }}
+            />
           </View>
           <View>
             <CustomText style={styles.temperatureText}>
@@ -255,44 +257,52 @@ function CurrentWeatherView(props) {
   );
 }
 
-function ForecastWeatherViewContainer(props) {
-  const [loading, setLoading] = useState(true)
-  const [data, setData] = useState()
+const ForecastWeatherViewContainer = (props) => {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState();
   const { selection, setSelection } = useContext(selectionContext);
 
   const getData = async () => {
     const _data = await fetchForecast(props.city);
     setData(_data);
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   useEffect(() => {
     getData();
   }, [selection]); //Display after unmount
 
   console.log("in ForecastWeatherViewContainer with data: " + data);
-  return (
-    loading ? <Text>Loading...</Text> :
-      <View style={[styles.row, { minWidth: "85%", maxWidth: 400, marginTop: 7, marginBottom: 5 }]}>
-        <ForecastWeatherView data={data[0]} />
-        <ForecastWeatherView data={data[1]} />
-        <ForecastWeatherView data={data[2]} />
-        <ForecastWeatherView data={data[3]} />
-        <ForecastWeatherView data={data[4]} />
-      </View>
+  return loading ? (
+    <Text>Loading...</Text>
+  ) : (
+    <View
+      style={[
+        styles.row,
+        { minWidth: "85%", maxWidth: 400, marginTop: 7, marginBottom: 5 },
+      ]}
+    >
+      <ForecastWeatherView data={data[0]} />
+      <ForecastWeatherView data={data[1]} />
+      <ForecastWeatherView data={data[2]} />
+      <ForecastWeatherView data={data[3]} />
+      <ForecastWeatherView data={data[4]} />
+    </View>
   );
 }
 
-function ForecastWeatherView(props) {
+const ForecastWeatherView = (props) => {
   return (
     <View style={styles.forecastWeatherViewContainer}>
       {/*<CustomText>props.data.fact</CustomText>*/}
       <View style={styles.forecastWeatherViewTop}>
-        <CustomText style={styles.timeText}>
-          {props.data.time}
-        </CustomText>
-        <Image source={{ uri: `https://openweathermap.org/img/wn/${props.data.icon}@2x.png` }}
-          style={{ width: 40, height: 40 }} />
+        <CustomText style={styles.timeText}>{props.data.time}</CustomText>
+        <Image
+          source={{
+            uri: `https://openweathermap.org/img/wn/${props.data.icon}@2x.png`,
+          }}
+          style={{ width: 40, height: 40 }}
+        />
         <CustomText style={styles.smallTemperatureText}>
           {props.data.temperature.toFixed(0) + "°C"}
         </CustomText>
@@ -305,16 +315,17 @@ function ForecastWeatherView(props) {
           {props.data.humidity + "%"}
         </CustomText>
         <CustomText style={styles.smallSpecificsText}>
-          {props.data.precipitation + "mm"}</CustomText>
+          {props.data.precipitation + "mm"}
+        </CustomText>
       </View>
-    </View >
-  )
+    </View>
+  );
 }
 
 // Required for global style inheritance, in this case the font.
-function CustomText(props) {
+const CustomText = (props) => {
   const [loaded] = useFonts({
-    Arial: require("./assets/fonts/arial.ttf")
+    Arial: require("./assets/fonts/arial.ttf"),
   });
 
   if (!loaded) {
