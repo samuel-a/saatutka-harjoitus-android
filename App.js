@@ -5,6 +5,7 @@ import SelectDropdown from "react-native-select-dropdown"
 import { fetchCurrentWeather, fetchForecast } from "./request.js";
 import { styles } from "./styles.js";
 import { useFonts } from 'expo-font'; // Required for Arial
+import symbolicateStackTrace from "react-native/Libraries/Core/Devtools/symbolicateStackTrace";
 
 // Context used solely for transferring knowledge of which cities are selected
 // from dropdown to WeatherList
@@ -115,6 +116,15 @@ function ViewPicker() {
   if (selection === cities[0]) {
     return (
       <View>
+        {cities.slice(1).map(city => {
+          return (
+            <View>
+              {/*<CurrentWeatherView city={city} />*/}
+              <ForecastWeatherViewContainer city={city} />
+            </View>
+          )
+        })}
+        {/*
         <CurrentWeatherView city={cities[1]} />
         <ForecastWeatherViewContainer city={cities[1]} />
         <CurrentWeatherView city={cities[2]} />
@@ -122,7 +132,7 @@ function ViewPicker() {
         <CurrentWeatherView city={cities[3]} />
         <ForecastWeatherViewContainer city={cities[3]} />
         <CurrentWeatherView city={cities[4]} />
-        <ForecastWeatherViewContainer city={cities[4]} />
+        <ForecastWeatherViewContainer city={cities[4]} />*/}
         {/*
           <CurrentWeatherView city={cities[0]} />
           <ForecastWeatherViewContainer data={cities[0]} />
@@ -139,8 +149,9 @@ function ViewPicker() {
       <View>
         <CurrentWeatherView
           city={selection} />
-        <ForecastWeatherView city={selection} />
-        {/*<ForecastWeatherViewContainer
+        {/*
+                <ForecastWeatherViewContainer city={city}/>
+<ForecastWeatherViewContainer
             data={forecast[cities.indexOf(selection+1)]} />*/}
       </View>
     )
@@ -198,6 +209,9 @@ function CurrentWeatherView(props) {
 
   useEffect(() => {
     getData();
+    return () => {
+      setData({})
+    }
   }, [])
 
   console.log("CurrentWeatherView data: ", data);
@@ -205,8 +219,8 @@ function CurrentWeatherView(props) {
     <View style={styles.currentWeatherView}>
       <View style={styles.row}>
         <View>
-          <CustomText>{props.city + data.fact}</CustomText>
-          {/*<CustomText style={styles.cityText}>{data.city}</CustomText>
+          {/*<CustomText>{props.city + data.fact}</CustomText>*/}
+          <CustomText style={styles.cityText}>{data.city}</CustomText>
           <CustomText style={styles.descriptionText}>{data.description}</CustomText>
         </View>
         <View style={styles.row}>
@@ -216,7 +230,7 @@ function CurrentWeatherView(props) {
           </View>
           <View>
             <CustomText style={styles.temperatureText}>
-              {data.temperature.toFixed(1) + "°C"}
+              {data.temperature.toFixed(0) + "°C"}
             </CustomText>
           </View>
         </View>
@@ -236,7 +250,7 @@ function CurrentWeatherView(props) {
           </CustomText>
           <CustomText style={styles.specificsText}>
             {"Sademäärä (3h): " + data.precipitation + "mm"}
-          </CustomText>*/}
+          </CustomText>
         </View>
       </View>
     </View>
@@ -256,17 +270,20 @@ function ForecastWeatherViewContainer(props) {
 
   useEffect(() => {
     getData();
+    return () => {
+      setData({})
+    }
   }, []); //Display after unmount
 
+  console.log("in ForecastWeatherViewContainer with data: " + data);
   return (
     loading ? <Text>Loading...</Text> :
       <View style={[styles.row, { minWidth: "85%", maxWidth: 400, marginTop: 7, marginBottom: 5 }]}>
-        <ForecastWeatherView data={data}/>
-        {/*<ForecastWeatherView data={data[0]} />
+        <ForecastWeatherView data={data[0]} />
         <ForecastWeatherView data={data[1]} />
         <ForecastWeatherView data={data[2]} />
         <ForecastWeatherView data={data[3]} />
-  <ForecastWeatherView data={data[4]} />*/}
+        <ForecastWeatherView data={data[4]} />
       </View>
   );
 }
@@ -274,8 +291,7 @@ function ForecastWeatherViewContainer(props) {
 function ForecastWeatherView(props) {
   return (
     <View style={styles.forecastWeatherViewContainer}>
-      <CustomText>props.data.fact</CustomText>
-      {/*
+      {/*<CustomText>props.data.fact</CustomText>*/}
       <View style={styles.forecastWeatherViewTop}>
         <CustomText style={styles.timeText}>
           {props.data.time}
@@ -295,7 +311,7 @@ function ForecastWeatherView(props) {
         </CustomText>
         <CustomText style={styles.smallSpecificsText}>
           {props.data.precipitation + "mm"}</CustomText>
-      </View>*/}
+      </View>
     </View >
   )
 }
