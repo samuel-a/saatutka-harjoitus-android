@@ -62,6 +62,3 @@ buck-out/
 # Expo
 .expo/*
 web-build/
-
-###
-api-config.json
