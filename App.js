@@ -1,11 +1,10 @@
-import { View, Text, StyleSheet, Image, ScrollView, SafeAreaView }
+import { View, Text, Image, ScrollView, SafeAreaView }
   from "react-native";
 import React, { useState, useContext, useEffect, useRef } from "react";
 import SelectDropdown from "react-native-select-dropdown"
 import { fetchCurrentWeather, fetchForecast } from "./request.js";
+import { styles } from "./styles.js";
 import { useFonts } from 'expo-font'; // Required for Arial
-import { getOverlappingDaysInIntervals } from "date-fns";
-
 
 // Context used solely for transferring knowledge of which cities are selected
 // from dropdown to WeatherList
@@ -26,6 +25,7 @@ const cities = [
 export default function App() {
   const [selection, setSelection] = useState(cities[0])
   const value = { selection, setSelection };
+
   return (
     <SafeAreaView
       style={{ backgroundColor: "#F8F9FA", flex: 1 }}
@@ -112,17 +112,17 @@ function ViewPicker() {
     getData();
   }, []);*/
 
-  if (selection === "Kaikki kaupungit") {
+  if (selection === cities[0]) {
     return (
       <View>
         <CurrentWeatherView city={cities[1]} />
-        <ForecastWeatherView city={cities[1]} />
+        <ForecastWeatherViewContainer city={cities[1]} />
         <CurrentWeatherView city={cities[2]} />
-        <ForecastWeatherView city={cities[2]} />
+        <ForecastWeatherViewContainer city={cities[2]} />
         <CurrentWeatherView city={cities[3]} />
-        <ForecastWeatherView city={cities[3]} />
+        <ForecastWeatherViewContainer city={cities[3]} />
         <CurrentWeatherView city={cities[4]} />
-        <ForecastWeatherView city={cities[4]} />
+        <ForecastWeatherViewContainer city={cities[4]} />
         {/*
           <CurrentWeatherView city={cities[0]} />
           <ForecastWeatherViewContainer data={cities[0]} />
@@ -167,7 +167,7 @@ function DropDown() {
       data={cities}
       onSelect={(selectedItem, index) => {
         setSelection(selectedItem)
-        console.log("selection at DropDown(): " + selectedItem)
+        //console.log("selection at DropDown(): " + selectedItem)
       }}
       buttonTextAfterSelection={(selectedItem, index) => {
         // text represented after item is selected
@@ -187,8 +187,10 @@ function CurrentWeatherView(props) {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState()
   const { selection, setSelection } = useContext(selectionContext);
+  console.log(`Fetching at CurrentWeatherView with city=${props.city}`);
 
   const getData = async () => {
+    //console.log(`Fetching at CurrentWeatherView with city=${props.city}`);
     const _data = await fetchCurrentWeather(props.city);
     setData(_data);
     setLoading(false)
@@ -196,14 +198,15 @@ function CurrentWeatherView(props) {
 
   useEffect(() => {
     getData();
-  }, [selection])
+  }, [])
 
   console.log("CurrentWeatherView data: ", data);
   return (loading ? <Text>Loading...</Text> :
     <View style={styles.currentWeatherView}>
       <View style={styles.row}>
         <View>
-          <CustomText style={styles.cityText}>{data.city}</CustomText>
+          <CustomText>{props.city + data.fact}</CustomText>
+          {/*<CustomText style={styles.cityText}>{data.city}</CustomText>
           <CustomText style={styles.descriptionText}>{data.description}</CustomText>
         </View>
         <View style={styles.row}>
@@ -233,7 +236,7 @@ function CurrentWeatherView(props) {
           </CustomText>
           <CustomText style={styles.specificsText}>
             {"Sademäärä (3h): " + data.precipitation + "mm"}
-          </CustomText>
+          </CustomText>*/}
         </View>
       </View>
     </View>
@@ -241,20 +244,38 @@ function CurrentWeatherView(props) {
 }
 
 function ForecastWeatherViewContainer(props) {
+  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState()
+  const { selection, setSelection } = useContext(selectionContext);
+
+  const getData = async () => {
+    const _data = await fetchForecast(props.city);
+    setData(_data);
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    getData();
+  }, []); //Display after unmount
+
   return (
-    <View style={[styles.row, { minWidth: "85%", maxWidth: 400, marginTop: 7, marginBottom: 5 }]}>
-      <ForecastWeatherView data={props.data[0]} />
-      <ForecastWeatherView data={props.data[1]} />
-      <ForecastWeatherView data={props.data[2]} />
-      <ForecastWeatherView data={props.data[3]} />
-      <ForecastWeatherView data={props.data[4]} />
-    </View>
+    loading ? <Text>Loading...</Text> :
+      <View style={[styles.row, { minWidth: "85%", maxWidth: 400, marginTop: 7, marginBottom: 5 }]}>
+        <ForecastWeatherView data={data}/>
+        {/*<ForecastWeatherView data={data[0]} />
+        <ForecastWeatherView data={data[1]} />
+        <ForecastWeatherView data={data[2]} />
+        <ForecastWeatherView data={data[3]} />
+  <ForecastWeatherView data={data[4]} />*/}
+      </View>
   );
 }
 
 function ForecastWeatherView(props) {
   return (
     <View style={styles.forecastWeatherViewContainer}>
+      <CustomText>props.data.fact</CustomText>
+      {/*
       <View style={styles.forecastWeatherViewTop}>
         <CustomText style={styles.timeText}>
           {props.data.time}
@@ -274,7 +295,7 @@ function ForecastWeatherView(props) {
         </CustomText>
         <CustomText style={styles.smallSpecificsText}>
           {props.data.precipitation + "mm"}</CustomText>
-      </View>
+      </View>*/}
     </View >
   )
 }
@@ -295,146 +316,3 @@ function CustomText(props) {
     </Text>
   );
 }
-
-styles = StyleSheet.create({
-  topBar: {
-    alignSelf: "stretch",
-    height: 90,
-    backgroundColor: "#00A5E5",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  topBarText: {
-    fontSize: 18,
-    color: "#FFFFFF",
-    marginTop: 32
-  },
-
-  dropdownText: {
-    fontSize: 13,
-    color: "#262626"
-  },
-
-  dropdownButton: {
-    minWidth: "85%",
-    maxWidth: 400,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderRadius: 10,
-    borderColor: "#E6E6E6",
-    marginTop: 20
-  },
-
-  currentWeatherView: {
-    minWidth: "85%",
-    maxWidth: 400,
-    minHeight: 150,
-    maxHeight: 400,
-    backgroundColor: "white",
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderRadius: 10,
-    borderColor: "#E6E6E6",
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    marginTop: 20
-  },
-
-  forecastWeatherViewTop: {
-    flexDirection: "column",
-    backgroundColor: "white",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 0,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderColor: "#E6E6E6",
-    paddingHorizontal: 5,
-    paddingVertical: 5,
-    maxWidth: "100%",
-    marginHorizontal: 1
-  },
-
-  forecastWeatherViewBottom: {
-    maxHeight: "34%",
-    //flex: 1,400
-    flexDirection: "column",
-    backgroundColor: "#E5F6FD",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderWidth: 1,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    borderColor: "#E6E6E6",
-    paddingHorizontal: 5,
-    paddingVertical: 5,
-    maxWidth: 60,
-    minHeight: 50,
-    marginHorizontal: 1,
-  },
-
-  forecastWeatherViewContainer: {
-    maxHeight: 170,
-    width: "18%",
-  },
-
-  box: {
-    width: 50,
-    height: 20,
-  },
-
-  row: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between"
-  },
-
-  headline: {
-    fontSize: 18,
-    color: "#FFFFFF"
-  },
-
-  cityText: {
-    fontSize: 19,
-    color: "#262626",
-  },
-
-  dateText: {
-    fontSize: 15,
-    color: "#262626"
-  },
-
-  timeText: {
-    fontSize: 13,
-    color: "#70757A"
-  },
-
-  descriptionText: {
-    fontSize: 13,
-    color: "#70757A"
-  },
-
-  temperatureText: {
-    fontSize: 26,
-    color: "#262626",
-  },
-
-  smallTemperatureText: {
-    fontSize: 15,
-    color: "#70757A",
-  },
-
-  specificsText: {
-    fontSize: 13,
-    color: "#70757A",
-  },
-
-  smallSpecificsText: {
-    fontSize: 10,
-    color: "#70757A",
-  },
-});
