@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, Image, ScrollView, SafeAreaView }
   from "react-native";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import SelectDropdown from "react-native-select-dropdown"
 import { fetchCurrentWeather, fetchForecast } from "./request.js";
 import { useFonts } from 'expo-font'; // Required for Arial
+import { getOverlappingDaysInIntervals } from "date-fns";
 
 
 // Context used solely for transferring knowledge of which cities are selected
@@ -41,8 +42,6 @@ export default function App() {
           <selectionContext.Provider value={value}>
             <DropDown />
             <ViewPicker style={{ minWidth: "85%", maxWidth: 400 }} />
-            {/*<CurrentWeatherView />
-          <ForecastWeatherViewContainer />*/}
           </selectionContext.Provider>
         </View>
       </ScrollView>
@@ -51,79 +50,98 @@ export default function App() {
 }
 
 function ViewPicker() {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState([])
-  const [singleData, setSingleData] = useState([])
+  //const [loading, setLoading] = useState(true);
+  //const [data, setData] = useState([])
+  //const [forecast, setForecast] = useState([])
   const { selection, setSelection } = useContext(selectionContext);
-  console.log("selection at ViewPicker(): " + selection)
+  //console.log("selection at ViewPicker(): " + selection)
 
-  const getData = async () => {
-    if (selection === "Kaikki kaupungit") {
-      // const hel = await fetchCurrentWeather("Helsinki");
-      // const helForecast = await fetchForecast("Helsinki");
-      // const kuo = await fetchCurrentWeather("Kuopio");
-      // const kuoForecast = await fetchForecast("Kuopio");
-      // const jyv = fetchCurrentWeather("Jyväskylä");
-      // const jyvForecast = await fetchForecast("Jyväskylä");
-      // const tam = fetchCurrentWeather("Tampere");
-      // const tamForecast = await fetchForecast("Tampere");
+  /*const getData = async () => {
+    currentData = await Promise.all([
+      fetchCurrentWeather("Helsinki"),
+      fetchCurrentWeather("Jyväskylä"),
+      fetchCurrentWeather("Kuopio"),
+      fetchCurrentWeather("Tampere")
+    ]);
+    //forecastData = await Promise.all([])
+    forecastData = [
+      fetchForecast("Helsinki"),
+      fetchForecast("Jyväskylä"),
+      fetchForecast("Kuopio"),
+      fetchForecast("Tampere")
+    ];
+    setData(currentData);
+    setForecast(forecastData);
+    setLoading(false);
+    // if (selection === "Kaikki kaupungit") {
 
-      const [
-        hel, helForecast,
-        kuo, kuoForecast,
-        jyv, jyvForecast,
-        tam, tamForecast] = await Promise.all([
-          fetchCurrentWeather("Helsinki"),
-          fetchForecast("Helsinki"),
-          fetchCurrentWeather("Kuopio"),
-          fetchForecast("Kuopio"),
-          fetchCurrentWeather("Jyväskylä"),
-          fetchForecast("Jyväskylä"),
-          fetchCurrentWeather("Tampere"),
-          fetchForecast("Tampere")]
-          );
+    // const [
+    //   hel, helForecast,
+    //   kuo, kuoForecast,
+    //   jyv, jyvForecast,
+    //   tam, tamForecast] = await Promise.all([
+    //     fetchCurrentWeather("Helsinki"),
+    //     fetchForecast("Helsinki"),
+    //     fetchCurrentWeather("Kuopio"),
+    //     fetchForecast("Kuopio"),
+    //     fetchCurrentWeather("Jyväskylä"),
+    //     fetchForecast("Jyväskylä"),
+    //     fetchCurrentWeather("Tampere"),
+    //     fetchForecast("Tampere")]
+    //   );
 
-      setData([
-        hel, helForecast,
-        kuo, kuoForecast,
-        jyv, jyvForecast,
-      tam, tamForecast]);
-      setLoading(false);
-    } else {
-      console.log("we hit else clause")
-      const single_data = await Promise.all([
-        fetchCurrentWeather(selection),
-        fetchForecast(selection)]);
-        ///[selectionData, selectionForecastData]
-      setSingleData(single_data);
-      setLoading(false);
-    }
+    //   setData([
+    //     hel, helForecast,
+    //     kuo, kuoForecast,
+    //     jyv, jyvForecast,
+    //     tam, tamForecast]);
+    //   setLoading(false);
+    // } else {
+    //   console.log("WE HIT THE ELSE CLAUSE")
+    //   const [selectionData, selectionForecastData] = await Promise.all([
+    //     fetchCurrentWeather(selection),
+    //     fetchForecast(selection)]);
+    //   ///[selectionData, selectionForecastData]
+    //   setSingleData(single_data);
+    //   setLoading(false);
+    // }
   }
-  
+
   useEffect(() => {
+    console.log("re-render happening with selection = " + selection);
     getData();
-  }, [])
+  }, []);*/
 
   if (selection === "Kaikki kaupungit") {
     return (
-        loading ? <Text>Loading...</Text> : (
-        <View>
-        <CurrentWeatherView data={data[0]} />
-        <ForecastWeatherViewContainer data={data[1]} />
-        <CurrentWeatherView data={data[2]} />
-        <ForecastWeatherViewContainer data={data[3]} />
-        <CurrentWeatherView data={data[4]} />
-        <ForecastWeatherViewContainer data={data[5]} />
-        <CurrentWeatherView data={data[6]} />
-        <ForecastWeatherViewContainer data={data[7]} />
-      </View>)
+      <View>
+        <CurrentWeatherView city={cities[1]} />
+        <ForecastWeatherView city={cities[1]} />
+        <CurrentWeatherView city={cities[2]} />
+        <ForecastWeatherView city={cities[2]} />
+        <CurrentWeatherView city={cities[3]} />
+        <ForecastWeatherView city={cities[3]} />
+        <CurrentWeatherView city={cities[4]} />
+        <ForecastWeatherView city={cities[4]} />
+        {/*
+          <CurrentWeatherView city={cities[0]} />
+          <ForecastWeatherViewContainer data={cities[0]} />
+          <CurrentWeatherView data={data[1]} />
+          <ForecastWeatherViewContainer data={forecast[1]} />
+          <CurrentWeatherView data={data[2]} />
+          <ForecastWeatherViewContainer data={forecast[2]} />
+          <CurrentWeatherView data={data[3]} />
+          <ForecastWeatherViewContainer data={forecast[3]} />*/}
+      </View>
     )
   } else {
     return (
-      loading ? <Text> Loading... </Text> :
       <View>
-        <CurrentWeatherView data={singleData[0]} />
-        <ForecastWeatherViewContainer data={singleData[1]} />
+        <CurrentWeatherView
+          city={selection} />
+        <ForecastWeatherView city={selection} />
+        {/*<ForecastWeatherViewContainer
+            data={forecast[cities.indexOf(selection+1)]} />*/}
       </View>
     )
   }
@@ -149,7 +167,7 @@ function DropDown() {
       data={cities}
       onSelect={(selectedItem, index) => {
         setSelection(selectedItem)
-        console.log("selection at DropDown(): "+ selection)
+        console.log("selection at DropDown(): " + selectedItem)
       }}
       buttonTextAfterSelection={(selectedItem, index) => {
         // text represented after item is selected
@@ -166,23 +184,36 @@ function DropDown() {
 }
 
 function CurrentWeatherView(props) {
-  console.log("In CurrentWeatherView, props.data:");
-  console.log(props.data);
-  return (
+  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState()
+  const { selection, setSelection } = useContext(selectionContext);
+
+  const getData = async () => {
+    const _data = await fetchCurrentWeather(props.city);
+    setData(_data);
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    getData();
+  }, [selection])
+
+  console.log("CurrentWeatherView data: ", data);
+  return (loading ? <Text>Loading...</Text> :
     <View style={styles.currentWeatherView}>
       <View style={styles.row}>
         <View>
-          <CustomText style={styles.cityText}>{props.data.city}</CustomText>
-          <CustomText style={styles.descriptionText}>{props.data.description}</CustomText>
+          <CustomText style={styles.cityText}>{data.city}</CustomText>
+          <CustomText style={styles.descriptionText}>{data.description}</CustomText>
         </View>
         <View style={styles.row}>
           <View>
-            <Image source={{ uri: `https://openweathermap.org/img/wn/${props.data.icon}@2x.png` }}
+            <Image source={{ uri: `https://openweathermap.org/img/wn/${data.icon}@2x.png` }}
               style={{ width: 60, height: 60, marginTop: -12, marginRight: 5 }} />
           </View>
           <View>
             <CustomText style={styles.temperatureText}>
-              {props.data.temperature.toFixed(1) + "°C"}
+              {data.temperature.toFixed(1) + "°C"}
             </CustomText>
           </View>
         </View>
@@ -190,18 +221,18 @@ function CurrentWeatherView(props) {
       <View style={styles.row}>
         <View>
           <CustomText />
-          <CustomText style={styles.dateText}>{props.data.date}</CustomText>
-          <CustomText style={styles.timeText}>{props.data.time}</CustomText>
+          <CustomText style={styles.dateText}>{data.date}</CustomText>
+          <CustomText style={styles.timeText}>{data.time}</CustomText>
         </View>
         <View style={{ alignItems: "flex-end" }}>
           <CustomText style={styles.specificsText}>
-            {"Tuuli: " + props.data.wind_speed + " m/s"}
+            {"Tuuli: " + data.wind_speed + " m/s"}
           </CustomText>
           <CustomText style={styles.specificsText}>
-            {"Ilmankosteus: " + props.data.humidity + "%"}
+            {"Ilmankosteus: " + data.humidity + "%"}
           </CustomText>
           <CustomText style={styles.specificsText}>
-            {"Sademäärä (3h): " + props.data.precipitation + "mm"}
+            {"Sademäärä (3h): " + data.precipitation + "mm"}
           </CustomText>
         </View>
       </View>
