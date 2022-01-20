@@ -4,15 +4,16 @@ import SelectDropdown from "react-native-select-dropdown";
 import { fetchCurrentWeather, fetchForecast } from "./request.js";
 import { styles } from "./styles.js";
 import { useFonts } from "expo-font"; // Required for Arial
-//import symbolicateStackTrace from "react-native/Libraries/Core/Devtools/symbolicateStackTrace";
 
 // Context used solely for transferring knowledge of which cities are selected
 // from dropdown to WeatherList
 const selectionContext = React.createContext({
   selection: "Kaikki kaupungit",
-  setSelection: () => {},
+  setSelection: () => { },
 });
 
+// Cities to be picked from, first option is all cities because this structure
+// is fed directly into the dropdown menu. Could be done otherwise.
 const cities = [
   "Kaikki kaupungit",
   "Helsinki",
@@ -21,6 +22,8 @@ const cities = [
   "Tampere",
 ];
 
+// Shows weather information for the city selected in the dropdown or for all
+// cities, though it could be changed to portray any combination of cities.
 export default function App() {
   const [selection, setSelection] = useState(cities[0]);
   const value = { selection, setSelection };
@@ -34,8 +37,7 @@ export default function App() {
             justifyContent: "flex-start",
             alignItems: "center",
             marginBottom: 15,
-          }}
-        >
+          }}>
           <TopBar />
           <selectionContext.Provider value={value}>
             <DropDown />
@@ -47,68 +49,10 @@ export default function App() {
   );
 }
 
+// Chooses weather to fshow all cities or just the one selected by name in the
+// dropdown.
 const ViewPicker = () => {
-  //const [loading, setLoading] = useState(true);
-  //const [data, setData] = useState([])
-  //const [forecast, setForecast] = useState([])
   const { selection, setSelection } = useContext(selectionContext);
-  //console.log("selection at ViewPicker(): " + selection)
-
-  /*const getData = async () => {
-    currentData = await Promise.all([
-      fetchCurrentWeather("Helsinki"),
-      fetchCurrentWeather("Jyväskylä"),
-      fetchCurrentWeather("Kuopio"),
-      fetchCurrentWeather("Tampere")
-    ]);
-    //forecastData = await Promise.all([])
-    forecastData = [
-      fetchForecast("Helsinki"),
-      fetchForecast("Jyväskylä"),
-      fetchForecast("Kuopio"),
-      fetchForecast("Tampere")
-    ];
-    setData(currentData);
-    setForecast(forecastData);
-    setLoading(false);
-    // if (selection === "Kaikki kaupungit") {
-
-    // const [
-    //   hel, helForecast,
-    //   kuo, kuoForecast,
-    //   jyv, jyvForecast,
-    //   tam, tamForecast] = await Promise.all([
-    //     fetchCurrentWeather("Helsinki"),
-    //     fetchForecast("Helsinki"),
-    //     fetchCurrentWeather("Kuopio"),
-    //     fetchForecast("Kuopio"),
-    //     fetchCurrentWeather("Jyväskylä"),
-    //     fetchForecast("Jyväskylä"),
-    //     fetchCurrentWeather("Tampere"),
-    //     fetchForecast("Tampere")]
-    //   );
-
-    //   setData([
-    //     hel, helForecast,
-    //     kuo, kuoForecast,
-    //     jyv, jyvForecast,
-    //     tam, tamForecast]);
-    //   setLoading(false);
-    // } else {
-    //   console.log("WE HIT THE ELSE CLAUSE")
-    //   const [selectionData, selectionForecastData] = await Promise.all([
-    //     fetchCurrentWeather(selection),
-    //     fetchForecast(selection)]);
-    //   ///[selectionData, selectionForecastData]
-    //   setSingleData(single_data);
-    //   setLoading(false);
-    // }
-  }
-
-  useEffect(() => {
-    console.log("re-render happening with selection = " + selection);
-    getData();
-  }, []);*/
 
   if (selection === cities[0]) {
     return (
@@ -121,24 +65,6 @@ const ViewPicker = () => {
             </View>
           );
         })}
-        {/*
-        <CurrentWeatherView city={cities[1]} />
-        <ForecastWeatherViewContainer city={cities[1]} />
-        <CurrentWeatherView city={cities[2]} />
-        <ForecastWeatherViewContainer city={cities[2]} />
-        <CurrentWeatherView city={cities[3]} />
-        <ForecastWeatherViewContainer city={cities[3]} />
-        <CurrentWeatherView city={cities[4]} />
-        <ForecastWeatherViewContainer city={cities[4]} />*/}
-        {/*
-          <CurrentWeatherView city={cities[0]} />
-          <ForecastWeatherViewContainer data={cities[0]} />
-          <CurrentWeatherView data={data[1]} />
-          <ForecastWeatherViewContainer data={forecast[1]} />
-          <CurrentWeatherView data={data[2]} />
-          <ForecastWeatherViewContainer data={forecast[2]} />
-          <CurrentWeatherView data={data[3]} />
-          <ForecastWeatherViewContainer data={forecast[3]} />*/}
       </View>
     );
   } else {
@@ -146,15 +72,12 @@ const ViewPicker = () => {
       <View>
         <CurrentWeatherView city={selection} />
         <ForecastWeatherViewContainer city={selection} />
-        {/*
-                <ForecastWeatherViewContainer city={city}/>
-<ForecastWeatherViewContainer
-            data={forecast[cities.indexOf(selection+1)]} />*/}
       </View>
     );
   }
 };
 
+// Bar at the top of the app. Has title.
 const TopBar = () => {
   return (
     <View style={styles.topBar}>
@@ -163,6 +86,7 @@ const TopBar = () => {
   );
 }
 
+// Dropdown menu that facilitates the picking of cities
 const DropDown = () => {
   const { selection, setSelection } = useContext(selectionContext);
   return (
@@ -172,31 +96,29 @@ const DropDown = () => {
       buttonTextStyle={styles.dropdownText}
       data={cities}
       onSelect={(selectedItem, index) => {
+        // upon selection change the selection value in the context
         setSelection(selectedItem);
-        //console.log("selection at DropDown(): " + selectedItem)
       }}
       buttonTextAfterSelection={(selectedItem, index) => {
         // text represented after item is selected
-        // if data array is an array of objects then return selectedItem.property to render after item is selected
         return selectedItem;
       }}
       rowTextForSelection={(item, index) => {
         // text represented for each item in dropdown
-        // if data array is an array of objects then return item.property to represent item in dropdown
         return item;
       }}
     />
   );
 }
 
+// Displays weather information for the current weather for the current city in
+// the selection context.
 const CurrentWeatherView = (props) => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState();
   const { selection, setSelection } = useContext(selectionContext);
-  console.log(`Fetching at CurrentWeatherView with city=${props.city}`);
 
   const getData = async () => {
-    //console.log(`Fetching at CurrentWeatherView with city=${props.city}`);
     const _data = await fetchCurrentWeather(props.city);
     setData(_data);
     setLoading(false);
@@ -204,9 +126,8 @@ const CurrentWeatherView = (props) => {
 
   useEffect(() => {
     getData();
-  }, [selection]);
+  }, [selection]); //Fetch on re-renders i.e. when the selection changes.
 
-  console.log("CurrentWeatherView data: ", data);
   return loading ? (
     <Text>Loading...</Text>
   ) : (
@@ -257,6 +178,7 @@ const CurrentWeatherView = (props) => {
   );
 }
 
+// Holds several ForecastWeatherViews and delivers them their data through props.
 const ForecastWeatherViewContainer = (props) => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState();
@@ -270,9 +192,8 @@ const ForecastWeatherViewContainer = (props) => {
 
   useEffect(() => {
     getData();
-  }, [selection]); //Display after unmount
+  }, [selection]); //Fetch on re-renders i.e. when the selection changes.
 
-  console.log("in ForecastWeatherViewContainer with data: " + data);
   return loading ? (
     <Text>Loading...</Text>
   ) : (
@@ -291,6 +212,7 @@ const ForecastWeatherViewContainer = (props) => {
   );
 }
 
+// Draws forecast weather information for a single forecast.
 const ForecastWeatherView = (props) => {
   return (
     <View style={styles.forecastWeatherViewContainer}>
