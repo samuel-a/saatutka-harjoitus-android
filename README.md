@@ -16,5 +16,6 @@ too fast so be mindful of this. Requests are only generated when you change your
 selection in the dropdown.
 
 ## Screenshots
-![A view showing all cities](./screenshots/AllCities.jpg)
-![A view showing all cities](./screenshots/Tampere.jpg)
+![A view showing all cities.](./screenshots/AllCities.jpg)
+![A view showing the view for Tampere.](./screenshots/Tampere.jpg)
+![A view showing the dropdown menu.](./screenshots/Dropdown.jpg)
