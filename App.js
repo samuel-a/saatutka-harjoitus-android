@@ -1,11 +1,11 @@
 import { View, Text, Image, ScrollView, SafeAreaView }
   from "react-native";
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect} from "react";
 import SelectDropdown from "react-native-select-dropdown"
 import { fetchCurrentWeather, fetchForecast } from "./request.js";
 import { styles } from "./styles.js";
 import { useFonts } from 'expo-font'; // Required for Arial
-import symbolicateStackTrace from "react-native/Libraries/Core/Devtools/symbolicateStackTrace";
+//import symbolicateStackTrace from "react-native/Libraries/Core/Devtools/symbolicateStackTrace";
 
 // Context used solely for transferring knowledge of which cities are selected
 // from dropdown to WeatherList
@@ -50,7 +50,7 @@ export default function App() {
   );
 }
 
-function ViewPicker() {
+const ViewPicker = () => {
   //const [loading, setLoading] = useState(true);
   //const [data, setData] = useState([])
   //const [forecast, setForecast] = useState([])
@@ -118,8 +118,8 @@ function ViewPicker() {
       <View>
         {cities.slice(1).map(city => {
           return (
-            <View>
-              {/*<CurrentWeatherView city={city} />*/}
+            <View key={city}>
+              <CurrentWeatherView city={city} />
               <ForecastWeatherViewContainer city={city} />
             </View>
           )
@@ -149,6 +149,7 @@ function ViewPicker() {
       <View>
         <CurrentWeatherView
           city={selection} />
+        <ForecastWeatherViewContainer city={selection}/>
         {/*
                 <ForecastWeatherViewContainer city={city}/>
 <ForecastWeatherViewContainer
@@ -209,10 +210,7 @@ function CurrentWeatherView(props) {
 
   useEffect(() => {
     getData();
-    return () => {
-      setData({})
-    }
-  }, [])
+  }, [selection])
 
   console.log("CurrentWeatherView data: ", data);
   return (loading ? <Text>Loading...</Text> :
@@ -270,10 +268,7 @@ function ForecastWeatherViewContainer(props) {
 
   useEffect(() => {
     getData();
-    return () => {
-      setData({})
-    }
-  }, []); //Display after unmount
+  }, [selection]); //Display after unmount
 
   console.log("in ForecastWeatherViewContainer with data: " + data);
   return (
@@ -299,7 +294,7 @@ function ForecastWeatherView(props) {
         <Image source={{ uri: `https://openweathermap.org/img/wn/${props.data.icon}@2x.png` }}
           style={{ width: 40, height: 40 }} />
         <CustomText style={styles.smallTemperatureText}>
-          {props.data.temperature.toFixed(1) + "°C"}
+          {props.data.temperature.toFixed(0) + "°C"}
         </CustomText>
       </View>
       <View style={styles.forecastWeatherViewBottom}>

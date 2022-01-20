@@ -24,7 +24,7 @@ const idLookup = {
 }
 
 // Simple container class for holding the current weather information.
-class currentData {
+class CurrentData {
     constructor(
         city,
         icon,
@@ -48,7 +48,7 @@ class currentData {
     }
 }
 
-class forecastData {
+class ForecastData {
     constructor(
         icon,
         temperature,
@@ -74,7 +74,7 @@ async function fetchCurrentWeather(city) {
     console.log(`API_KEY: ${API_KEY}`);
 
     const requestString =
-        `http://api.openweathermap.org/data/2.5/weather?id=${id}&lang=fi&appid=${API_KEY}`;
+        `https://api.openweathermap.org/data/2.5/weather?id=${id}&lang=fi&appid=${API_KEY}`;
     console.log(requestString)
     const request = new Request(requestString);
 
@@ -103,7 +103,7 @@ async function fetchCurrentWeather(city) {
         //                                    options={day: "numeric", month: "long"});
 
         const _date = format(dt, "do MMMM", { locale: fi });
-        return new currentData(
+        return new CurrentData(
             city = city,
             icon = response.weather[0].icon,
             temperature = response.main.temp - 273.15, // transform to celsius
@@ -200,18 +200,22 @@ async function fetchCurrentWeather(city) {
 async function fetchForecast(city) {
     const id = idLookup[city];
     const requestString =
-        `api.openweathermap.org/data/2.5/forecast?id=${id}&cnt=6&lang=fi&appid=${API_KEY}`;
+        `https://api.openweathermap.org/data/2.5/forecast?id=${id}&cnt=6&lang=fi&appid=${API_KEY}`;
     const request = new Request(requestString);
     console.log(requestString);
     try {
+        console.log("1")
         const _response = await fetch(request);
+        console.log("2")
         const response = await _response.json();
+        console.log("3")
+        console.log(response);
         const tail = arr => (arr.length > 1 ? arr.slice(1) : arr);
         const forecast =
             tail(response.list).map((data) => {
                 let dt = new Date(data.dt * 1000);
                 let _time = `${dt.getHours()}:${dt.getMinutes()}`;
-                return new forecastData(
+                return new ForecastData(
                     icon = data.weather[0].icon,
                     temperature = data.main.temp - 273.15, // transform to celsius
                     wind_speed = data.wind.speed,
@@ -221,15 +225,15 @@ async function fetchForecast(city) {
                     typeof (response.precipitation) === "undefined" ? "--" : data.precipitation //empty if info not available
                 )
             })
+        console.log(forecast)
         return (forecast);
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
-    
     /*const request = new Request("https://catfact.ninja/fact");
     const _response = await fetch(request);
     const response = await _response.json();
     return (response);*/
 }
 
-export { fetchCurrentWeather, fetchForecast, currentData };
+export { fetchCurrentWeather, fetchForecast};
