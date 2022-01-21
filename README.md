@@ -6,8 +6,10 @@ Weather API to show weather information for select locations in Finland.
 ## How to run
 
 `npm start` and a platform that can run android Expo apps, such as an adroid
-simulator or Expo Go (https://expo.dev/client). Api configuration is done by
-placing your OWM api key in `api-config.json`.
+simulator or Expo Go (https://expo.dev/client). 
+To configure the API copy `api-config.json.template` to `api-config.json` and insert your personal API key. Here you can also set `"MOCK" : true` to run the app with mock values that don't fetch from the Weather API.
+
+
 
 ## Notes
 * Created with create-react-native-app.

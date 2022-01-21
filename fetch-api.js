@@ -1,6 +1,6 @@
 // Import Open Weather Map api key from api-config.json
-import * as keys from "./api-config.json";
-const API_KEY = keys.key;
+import * as config from "./api-config.json";
+const API_KEY = config.key;
 
 // React Native doesn't seem to play nice with ECMA-402 Date's (i.e.
 // toLocaleDateString produces non-working results) so the date-fns library is

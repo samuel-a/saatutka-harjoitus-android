@@ -1,7 +1,7 @@
 import { View, Text, Image, ScrollView, SafeAreaView } from "react-native";
 import React, { useState, useContext, useEffect } from "react";
 import SelectDropdown from "react-native-select-dropdown";
-import { fetchCurrentWeather, fetchForecast } from "./request.js";
+import { fetchCurrentWeather, fetchForecast } from "./fetch.js";
 import { styles } from "./styles.js";
 import { useFonts } from "expo-font"; // Required for Arial
 
@@ -118,15 +118,16 @@ const CurrentWeatherView = (props) => {
   const [data, setData] = useState();
   const { selection, setSelection } = useContext(selectionContext);
 
-  const getData = async () => {
-    const _data = await fetchCurrentWeather(props.city);
-    setData(_data);
-    setLoading(false);
-  };
+  
 
   useEffect(() => {
+    const getData = async () => {
+      const _data = await fetchCurrentWeather(props.city);
+      setData(_data);
+      setLoading(false);
+    };
     getData();
-  }, [selection]); //Fetch on re-renders i.e. when the selection changes.
+  }, [selection, props.city]); //Fetch on re-renders i.e. when the selection changes.
 
   return loading ? (
     <Text>Loading...</Text>
@@ -184,15 +185,17 @@ const ForecastWeatherViewContainer = (props) => {
   const [data, setData] = useState();
   const { selection, setSelection } = useContext(selectionContext);
 
-  const getData = async () => {
-    const _data = await fetchForecast(props.city);
-    setData(_data);
-    setLoading(false);
-  };
+  
 
   useEffect(() => {
+    const getData = async () => {
+      const _data = await fetchForecast(props.city);
+      setData(_data);
+      setLoading(false);
+    };
     getData();
-  }, [selection]); //Fetch on re-renders i.e. when the selection changes.
+
+  }, [selection, props.city]); //Fetch on re-renders i.e. when the selection changes.
 
   return loading ? (
     <Text>Loading...</Text>
@@ -203,11 +206,9 @@ const ForecastWeatherViewContainer = (props) => {
         { minWidth: "85%", maxWidth: 400, marginTop: 7, marginBottom: 5 },
       ]}
     >
-      <ForecastWeatherView data={data[0]} />
-      <ForecastWeatherView data={data[1]} />
-      <ForecastWeatherView data={data[2]} />
-      <ForecastWeatherView data={data[3]} />
-      <ForecastWeatherView data={data[4]} />
+      {data.map( _data =>
+        <ForecastWeatherView key={_data.time} data={_data} />
+      )}
     </View>
   );
 }
