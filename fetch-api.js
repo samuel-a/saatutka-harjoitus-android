@@ -103,14 +103,14 @@ async function fetchCurrentWeather(city) {
 //contain data for 15.00, 18.00, 21.00, 00.00 and 03.00).
 async function fetchForecast(city) {
   const id = idLookup[city];
-  const requestString = `https://api.openweathermap.org/data/2.5/forecast?id=${id}&cnt=6&lang=fi&appid=${API_KEY}`;
+  const requestString = `https://api.openweathermap.org/data/2.5/forecast?id=${id}&cnt=5&lang=fi&appid=${API_KEY}`;
   const request = new Request(requestString);
   try {
     const _response = await fetch(request);
     const response = await _response.json();
 
-    const tail = (arr) => (arr.length > 1 ? arr.slice(1) : arr);
-    const forecast = tail(response.list).map((data) => {
+      const forecast = response.list.map((data) => {
+
       let dt = new Date(data.dt * 1000);
       const _time = `${("0" + dt.getHours()).slice(-2)}:${(
         "0" + dt.getMinutes()
